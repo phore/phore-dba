@@ -60,7 +60,7 @@ $odb->update($entity1);
 Assert::equal(null, $odb->lastStatement);
 
 // Test loading by primary key
-$entity3 = __TestEntity::Cast($odb->load(__TestEntity::class, 1));
+$entity3 = __TestEntity::Load(1);
 Assert::equal("SELECT * FROM __TestEntity WHERE id='1';", $odb->lastStatement);
 
 
