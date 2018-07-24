@@ -63,7 +63,7 @@ Assert::equal(null, $odb->lastStatement);
 $entity3 = __TestEntity::Load(1);
 Assert::equal("SELECT * FROM __TestEntity WHERE id='1';", $odb->lastStatement);
 
-
+Assert::equal(["name"], $entity3->push(["name" => "abcde"]));
 
 
 // Load an Entity from Database and ensure changed properties are empty

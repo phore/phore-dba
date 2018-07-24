@@ -88,6 +88,16 @@ class EntityObjectAccessHelper
     }
 
 
+    public function setData($propertyName, $newValue)
+    {
+        $this->refl->getProperty($propertyName)->setValue($this->obj, $newValue);
+    }
+
+    public function getData($propertyName, $newValue)
+    {
+        return $this->refl->getProperty($propertyName)->getValue($this->obj);
+    }
+
     public function setDataAssoc(array $data)
     {
         foreach ($this->refl->getProperties() as $curProp) {

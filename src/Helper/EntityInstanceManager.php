@@ -9,6 +9,9 @@
 namespace Phore\Dba\Helper;
 
 
+use http\Exception\InvalidArgumentException;
+use Phore\Dba\Entity\Entity;
+
 class EntityInstanceManager
 {
 
@@ -17,12 +20,16 @@ class EntityInstanceManager
 
     public function push(string $clasName, $pkVal, array $data)
     {
+        if ($pkVal == null)
+            throw new \InvalidArgumentException("primary key value must not be null.");
         $this->entities[$clasName . "#" . $pkVal] = $data;
     }
 
 
     public function destroy(string $className, $pkVal)
     {
+        if ($pkVal == null)
+            throw new \InvalidArgumentException("primary key value must not be null.");
         unset ($this->entities[$className . "#" . $pkVal]);
     }
 
@@ -33,6 +40,8 @@ class EntityInstanceManager
 
     public function get (string $className, $pkVal)
     {
+        if ($pkVal == null)
+            throw new \InvalidArgumentException("primary key value must not be null.");
         $key = $className . "#" . $pkVal;
         if ( ! isset ($this->entities[$key]))
             throw new \InvalidArgumentException("This entity is not observed by entityManager. Assure to load the entity using ::load() method. (StorKey: '$key')");
@@ -41,6 +50,8 @@ class EntityInstanceManager
 
     public function isChanged ($entity, string $propertyName) : bool
     {
+        if ( ! $entity->isPersistent())
+            return true;
         $metaWrapper = new EntityObjectAccessHelper($entity);
         return $entity->$propertyName !== $this->get(get_class($entity), $entity->{$metaWrapper->getPrimaryKey()})[$propertyName];
     }

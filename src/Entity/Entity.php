@@ -21,12 +21,7 @@ trait Entity
      */
     public function __construct(array $data = [])
     {
-        foreach ($data as $colName => $value){
-            if(property_exists($class = __TRAIT__, $colName)){
-                throw new \InvalidArgumentException("Property does not exists in $class");
-            }
-            $this->$colName = $value;
-        }
+        $this->push($data);
     }
 
     /**
@@ -56,6 +51,13 @@ trait Entity
     }
 
 
+    public function isPersistent() : bool
+    {
+        $eoa = new EntityObjectAccessHelper($this);
+        return $eoa->getPrimaryKeyValue() !== null;
+    }
+
+
     public static function Cast($input) : self
     {
         $class = get_called_class();
@@ -66,6 +68,31 @@ trait Entity
         $wrapper->pushDataIntoObject($input);
         return $entity;
     }
+
+    /**
+     * Set the data from array,
+     *
+     * Retuns: Array with changed property names
+     *
+     * @param array $data
+     *
+     * @return array
+     * @throws \Exception
+     */
+    public function push(array $data) : array
+    {
+        $eoa = new EntityObjectAccessHelper($this);
+        $changed = [];
+        foreach ($eoa->getProperties() as $property) {
+            if (isset($data[$property->name]) && $eoa->getPrimaryKey() !== $property->name) {
+                $eoa->setData($property->name, $data[$property->name]);
+                if ($this->isChanged($property->name))
+                    $changed[] = $property->name;
+            }
+        }
+        return $changed;
+    }
+
 
     public function isChanged(string $propertyName) : bool
     {
