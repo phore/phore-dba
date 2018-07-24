@@ -1,0 +1,42 @@
+#!/usr/bin/php
+<?php
+/**
+ * Created by PhpStorm.
+ * User: matthes
+ * Date: 02.07.18
+ * Time: 13:44
+ */
+
+namespace OttoDB;
+
+
+use OttoDB\Migration\MigrationKernel;
+use Phore\Cli\CliController;
+
+require __DIR__ . "/../vendor/autoload.php";
+
+
+$localAutoLoad = getcwd() . "/vendor/autoload.php";
+if ( ! file_exists($localAutoLoad))
+    throw new \Exception("Cannot load $localAutoLoad.");
+
+require $localAutoLoad;
+
+$cliGroup = CliController::GetInstance("ottodb")->group("db");
+$cliGroup->description("Database management functions");
+
+$command = $cliGroup->command("migrate");
+$command->description("Check for Database updates and run migrations if necessary.");
+
+$command->run(function () {
+   $migrations = MigrationKernel::_GetOnMigration();
+   foreach ($migrations as $migration) {
+        echo "Running migration...";
+        $migration();
+   }
+   echo "\nDone.\n";
+});
+
+
+CliController::GetInstance("ottodb")->dispatch();
+

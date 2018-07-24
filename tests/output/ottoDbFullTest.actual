@@ -1,0 +1,7 @@
+Test\Pupil::__set_state(/* #fefa */ [
+	'id' => '12',
+	'name' => 'peter',
+	'surname' => 'dud\'e',
+	'grade' => '4a',
+	'birth' => '2000',
+])

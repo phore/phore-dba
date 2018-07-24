@@ -1,0 +1,32 @@
+{
+    "name": "phore/dba",
+    "description": "Database abstraction layer and ORM",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "marius",
+            "email": "marius.vogel@continue.de"
+        },
+        {
+            "name": "Matthias Leuffen",
+            "email": "m@tth.es"
+        }
+    ],
+    "bin": [
+        "bin/ottodb"
+    ],
+    "require": {
+        "php": ">=7.0",
+        "ext-pcre": "*",
+        "phore/cli": "^1.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Phore\\Dba\\": "src/"
+        }
+    },
+    "require-dev": {
+        "nette/tester": "^2.0"
+    }
+}

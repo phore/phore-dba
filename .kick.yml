@@ -1,0 +1,9 @@
+version: 1
+from: "continue/kickstart-flavor-gaia:testing"
+
+command:
+  build:
+    - "composer install"
+
+  test:
+    - "vendor/bin/tester -C ./tests"
