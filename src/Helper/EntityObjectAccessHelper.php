@@ -9,6 +9,8 @@
 namespace Phore\Dba\Helper;
 
 
+use http\Exception\InvalidArgumentException;
+
 class EntityObjectAccessHelper
 {
 
@@ -58,6 +60,8 @@ class EntityObjectAccessHelper
 
 
     public function getPrimaryKeyValue() {
+        if ( ! $this->refl->hasProperty($this->getPrimaryKey()))
+            throw new InvalidArgumentException("Entity class '{$this->getClassName()}'::{$this->getPrimaryKey()}: Primary key property missing.");
         return $this->refl->getProperty($this->getPrimaryKey())->getValue($this->obj);
     }
 
