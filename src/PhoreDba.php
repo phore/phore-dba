@@ -13,6 +13,7 @@ use Phore\Dba\Driver\DbDriver;
 use Phore\Dba\Driver\DbDriverResult;
 use Phore\Dba\Driver\PdoDbDriver;
 use Phore\Dba\Entity\Entity;
+use Phore\Dba\Ex\NoDataException;
 use Phore\Dba\Helper\EntityInstanceManager;
 use Phore\Dba\Helper\EntityObjectAccessHelper;
 use Phore\Dba\Helper\Result;
@@ -141,6 +142,7 @@ class PhoreDba
      *
      * @param $obj
      * @return Entity
+     * @throws NoDataException
      * @throws \Exception
      */
     public function load(string $className, $restrictionsOrPkValue)

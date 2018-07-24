@@ -6,7 +6,8 @@ Phore-dba is a very simple Object-Relational Mapper for PHP 7.
 
 It will map Objects to Tables using exact the same Names.
 
-It will work with mysqli, sql, and PDO in gerneral.
+- It will work with mysqli, sql, and PDO in gerneral.
+- Update only changed properties
 
 ## Installation  
 
@@ -45,7 +46,7 @@ $odb->insert(new SomeEntity(["name"=>"someName", "company"=>"SomeCompany"]));
 
 $odb->query("SELECT * FROM SomeEntity WHERE name=?", ["UnescapedValue"])->each(
     function (array $row) use ($odb) {
-        print_r ($entity = SomeEntity::Cast($row));
+        print_r ($entity = SomeEntity::Load($row["id"]);
         $entity->name = "MyNewName";
         $odb->update($entity);
         $odb->delete($entity);
@@ -58,24 +59,27 @@ $odb->query("SELECT * FROM SomeEntity WHERE name=?", ["UnescapedValue"])->each(
 ## Loading from Database
 
 ```php
-
 $entity = $odb->load(SomeEntity::class, 103878);
 ```
 
 or - with object casting (IDE Code-Completion):
 
 ```php
-$entity = SomeEntity::Cast($odb->load(SomeEntity::class, 103878));
+$entity = SomeEntity::Load(103878);
 ```
 
 
 
 ## Working with entities
 
+Entities must be loaded calling the `load()` method, so the framework
+can track changes. You should use `query()` only to retrieve Id's and
+load the entities afterwards. 
+
 ### Changed fields
 
 ```php
-$entity = SomeEntity::Cast($odb->load(SomeEntity::class, 103878));
+$entity = SomeEntity::Load(1234); // Shortcut
 $entity->name = "new Name";
 assert ($enetity->isChanged("name") === true)
 ```

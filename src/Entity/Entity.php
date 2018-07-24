@@ -9,6 +9,7 @@
 namespace Phore\Dba\Entity;
 
 
+use Phore\Dba\Ex\NoDataException;
 use Phore\Dba\Helper\EntityObjectAccessHelper;
 use Phore\Dba\PhoreDba;
 
@@ -27,9 +28,35 @@ trait Entity
             $this->$colName = $value;
         }
     }
-    
-    
-    public static function Cast($input, $pkField="") : self
+
+    /**
+     * Load a entity from database
+     *
+     * SomeEntity::Load(1234); // Load by Primary Key
+     * SomeEntity::Load(["prop1"=>"val1", "prop2"=>"val2"])
+     *
+     *
+     * @param $restrictionsOrPkValue
+     *
+     *
+     *
+     * @return Entity
+     * @throws \Exception
+     */
+    public static function Load($restrictionsOrPkValue) : self
+    {
+        try {
+            return PhoreDba::Get()->load(
+                get_called_class(),
+                $restrictionsOrPkValue
+            );
+        } catch (NoDataException $e) {
+            throw new NoDataException(get_called_class() . "::Load(): No matching data found in database.", 0, $e);
+        }
+    }
+
+
+    public static function Cast($input) : self
     {
         $class = get_called_class();
         if ($input instanceof $class)
