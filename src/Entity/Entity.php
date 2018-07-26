@@ -35,7 +35,7 @@ trait Entity
      *
      *
      *
-     * @return Entity
+     * @return $this
      * @throws \Exception
      */
     public static function Load($restrictionsOrPkValue) : self
@@ -57,7 +57,12 @@ trait Entity
         return $eoa->getPrimaryKeyValue() !== null;
     }
 
-
+    /**
+     * @param $input
+     *
+     * @return $this
+     * @throws \Exception
+     */
     public static function Cast($input) : self
     {
         $class = get_called_class();
