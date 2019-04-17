@@ -9,8 +9,7 @@
 namespace Phore\Dba\Helper;
 
 
-use http\Exception\InvalidArgumentException;
-use Phore\Dba\Entity\Entity;
+
 
 class EntityInstanceManager
 {
