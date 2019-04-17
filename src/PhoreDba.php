@@ -248,7 +248,7 @@ class PhoreDba
     public static function Get(): PhoreDba
     {
         if (self::$instance === null) {
-            throw new \Exception("OttoDb not initialized call Init() first");
+            throw new \Exception("PhoreDba not initialized call Init() first");
         }
         return self::$instance;
     }
