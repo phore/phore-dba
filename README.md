@@ -29,6 +29,7 @@ composer require phore/dba
 
 ```php
 class SomeEntity {
+    use Entity;
     const __META__ = [ "primaryKey" => "id" ];
     public $id;
     public $name;
@@ -38,7 +39,7 @@ class SomeEntity {
 $odb = PhoreDba::InitDSN("sqlite:/path/to/sqlite.db3");
 $odb->query ("CREATE TABLE IF NOT EXISTS SomeEntity (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT
+    name TEXT,
     company TEXT
 )");
 
