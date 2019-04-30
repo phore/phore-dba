@@ -88,11 +88,4 @@ $entity->name = "new Name";
 assert ($enetity->isChanged("name") === true)
 ```
 
-### Destructing entities
-
-
-
-## Database Migrations
-
-
 
