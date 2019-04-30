@@ -51,9 +51,10 @@ class Car {
 
 $db = PhoreDba::InitDSN("sqlite:/tmp/demo.slite");
 
+$db->query("SELECT COUNT(name) as num FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'")->dump();
 
+if ($db->query("SELECT COUNT(name) as num FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'")->first("num") == 0) {
 
-if ($db->query("SELECT COUNT(name) as num FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'")->first("num") === 0) {
     // Create the schema if no tables found.
     $db->multi_query('
 
@@ -69,14 +70,35 @@ if ($db->query("SELECT COUNT(name) as num FROM sqlite_master WHERE type='table' 
     );
     ');
 }
+$db->lastResult->dump();
 
 
-$pl = new ParkingLot(["parkingLotId"=>1, "name"=>"Lot 1"]);
+$pl = new ParkingLot(["parkingLotId"=>1, "name"=>"Lot 1 with long name"]);
 $db->insert($pl);
 
-$car = new Car(["carId"=>1, "name"=>"Car 1", "parkingLot"=>$pl]);
+$car = new Car(["carId"=>1, "name"=>"Car 1 with long name", "parkingLot"=>$pl]);
 $db->insert($car);
 
 
-print_r ($db->query("SELECT * FROM ParkingLot")->all());
 
+$db->query("SELECT * FROM ParkingLot")->dump();
+
+$db->query("SELECT * FROM Car")->dump();
+
+
+// Query and Cast (Allowing multiple connections)
+$parkingLot = ParkingLot::Cast($db->load(ParkingLot::class, 1));
+
+// Quick query and update
+$parkingLot = ParkingLot::Load(["parkingLotId"=>2]);
+
+$parkingLot->name = "New name2";
+$db->update($parkingLot);
+
+
+// Resolve Foreign Keys
+$car = Car::Load(1);
+$parkingLot = ParkingLot::Load($car->parkingLot);
+
+
+$db->query("SELECT c.name as cname, p.name as pname, * FROM ParkingLot as p LEFT JOIN Car as c ON p.parkingLotId = c.parkingLot")->dump();

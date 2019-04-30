@@ -32,7 +32,7 @@ class PdoDbDriver implements DbDriver
             $query = $this->connection->query($stmt);
             //$query->execute();
         } catch (\PDOException $e) {
-            throw new QueryException("query failed: '$stmt' error: {$e->getMessage()}", (int)$e->getCode(), $e);
+            throw new QueryException("Query failed: '$stmt' error: {$e->getMessage()}", (int)$e->getCode());
         }
         return new PdoDbDriverResult($query);
     }

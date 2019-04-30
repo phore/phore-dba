@@ -46,7 +46,7 @@ trait Entity
                 $restrictionsOrPkValue
             );
         } catch (NoDataException $e) {
-            throw new NoDataException(get_called_class() . "::Load(): No matching data found in database.", 0, $e);
+            throw new NoDataException(get_called_class() . "::Load(): No matching data found in database.", 0);
         }
     }
 
@@ -112,6 +112,7 @@ trait Entity
     public function __destruct()
     {
         $wrapper = new EntityObjectAccessHelper($this);
-        PhoreDba::Get()->entityInstanceManager->destroy(get_class($this), $wrapper->getPrimaryKeyValue());
+        if ($wrapper->getPrimaryKeyValue() !== null)
+            PhoreDba::Get()->entityInstanceManager->destroy(get_class($this), $wrapper->getPrimaryKeyValue());
     }
 }

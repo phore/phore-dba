@@ -8,6 +8,8 @@ It will map Objects to Tables using exact the same Names.
 
 - It will work with mysqli, sql, and PDO in gerneral.
 - Update only changed properties
+- [See sqlite3 example](examples/sqlite-create-table.php)
+
 
 ## Installation  
 

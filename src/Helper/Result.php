@@ -99,22 +99,53 @@ class Result
     }
 
 
-
-    public function dump(bool $return=false)
+    /**
+     * Output the Result as Table
+     *
+     * @param bool $return
+     * @return
+     * @throws \Exception
+     */
+    public function dump(int $limit = 6, bool $return=false)
     {
         $data = $this->all();
         // Print Header
-
         if (count($data) === 0) {
-            echo "\ndump(): Empty result\n";
+            $sret = "\ndump(): Empty result\n";
+            if ($return === true)
+                return $sret;
+            echo $sret;
+            return;
         }
         $header = array_keys($data[0]);
+        $sret = "\ndump({$this->query}): " . count($data) . " rows.\n";
 
-        echo "\ndump({$this->query}): " . count($data) . "rows.\n";
+        $digits = strlen(count($data));
+        $format = "| %-{$digits}s |";
         foreach ($header as $col) {
-
+            $format .= " %-16s |";
         }
+        $format .= "\n";
 
+        $sret .= sprintf($format, "#", ...$header);
+        $sret .= str_repeat("-",  2 + $digits + count($header) * 20) . "\n";
+
+        foreach ($data as $index => $row) {
+            $rowData = [];
+            if ($limit > 0 && ($index > $limit / 2 && $index < count($data) - $limit / 2)) {
+                continue;
+            }
+            foreach ($header as $curColName) {
+                $b = $row[$curColName];
+                if (strlen($b) > 14)
+                    $b = substr($b, 0,13) . "...";
+                $rowData[] = $b;
+            }
+            $sret .= sprintf($format, $index+1, ...$rowData);
+        }
+        if ($return === true)
+            return $sret;
+        echo $sret;
     }
 
 

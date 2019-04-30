@@ -15,13 +15,17 @@ class EntityInstanceManager
 {
 
     private $entities = [];
-
+    private $refcount = [];
 
     public function push(string $clasName, $pkVal, array $data)
     {
         if ($pkVal == null)
             throw new \InvalidArgumentException("primary key value must not be null.");
-        $this->entities[$clasName . "#" . $pkVal] = $data;
+        $key = $clasName . "#" . $pkVal;
+        if ( ! isset ($this->refcount[$key]))
+            $this->refcount[$key] = 0;
+        $this->refcount[$key]++;
+        $this->entities[$key] = $data;
     }
 
 
@@ -29,7 +33,12 @@ class EntityInstanceManager
     {
         if ($pkVal == null)
             throw new \InvalidArgumentException("primary key value must not be null.");
-        unset ($this->entities[$className . "#" . $pkVal]);
+        $key = $className . "#" . $pkVal;
+        $this->refcount[$key]--;
+        if ($this->refcount[$key] === 0) {
+            unset ($this->entities[$key]);
+            unset ($this->refcount[$key]);
+        }
     }
 
     public function getObservedEntityCount ()

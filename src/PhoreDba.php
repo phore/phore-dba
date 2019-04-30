@@ -77,7 +77,7 @@ class PhoreDba
             }
             if (is_object($colValue)) {
                 $ah = new EntityObjectAccessHelper($colValue);
-                $colValue = $ah->getPrimaryKey();
+                $colValue = $ah->getPrimaryKeyValue();
             }
             $values[] = $this->driver->escape((string)$colValue);
         }
@@ -117,7 +117,7 @@ class PhoreDba
             } else {
                 if (is_object($colValue)) {
                     $ah = new EntityObjectAccessHelper($colValue);
-                    $colValue = $ah->getPrimaryKey();
+                    $colValue = $ah->getPrimaryKeyValue();
                 }
                 $colValue = $this->driver->escape((string)$colValue);
             }
@@ -178,17 +178,22 @@ class PhoreDba
                 $colValue = $this->driver->escape((string)$restrictionValue);
                 $values[] = $property."=".$colValue;
             }
-            $where = "";
+            $where = implode(" AND ", $values);
         } else {
-            $values[] = $meta->getPrimaryKey()."=".$this->driver->escape($restrictionsOrPkValue);
+            $where = $meta->getPrimaryKey()."=".$this->driver->escape($restrictionsOrPkValue);
         }
-        if (!empty($values)) {
-            $where = " WHERE " . implode(" AND " , $values);
-        }
-        $stmt = "SELECT * FROM " . $meta->getTableName() . $where . ";";
+
+
+        $stmt = "SELECT * FROM " . $meta->getTableName() . " WHERE {$where};";
         $this->lastStatement = $stmt;
+
         $ret = $this->query($stmt);
-        $data = $ret->first();
+        try {
+            $data = $ret->first();
+        } catch (NoDataException $e) {
+            throw new NoDataException("Cannot load() entity $className: $stmt");
+        }
+
         $this->entityInstanceManager->push($className, $data[$meta->getPrimaryKey()], $data);
         $meta->setDataAssoc($data);
 
@@ -229,7 +234,7 @@ class PhoreDba
             $input
         );
         $this->lastStatement = $stmt;
-        $result = new Result($this->driver->query($stmt));
+        $result = new Result($this->driver->query($stmt), $stmt);
         $this->lastResult = $result;
         return $result;
     }
@@ -270,8 +275,7 @@ class PhoreDba
         switch ($parts["scheme"]) {
             case "sqlite":
                 $pdo = new \PDO("sqlite:{$parts["path"]}");
-                self::$instance = new PhoreDba(new PdoDbDriver($pdo));
-                return self::$instance;
+                return self::Init(new PdoDbDriver($pdo));
 
             default:
                 throw new \InvalidArgumentException("Invalid scheme '{$parts["scheme"]}'");
@@ -279,10 +283,10 @@ class PhoreDba
     }
 
 
-
-    
     public static function Init(DbDriver $driver): PhoreDba
     {
+        if (self::$instance !== null)
+            throw new \InvalidArgumentException("PhoreDba is already initialized.");
         self::$instance = new self($driver);
         return self::$instance;
     }
