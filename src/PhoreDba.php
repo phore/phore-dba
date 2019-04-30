@@ -33,6 +33,13 @@ class PhoreDba
     public $lastStatement;
 
     /**
+     * Debugging: The last result executed
+     *
+     * @var Result
+     */
+    public $lastResult;
+
+    /**
      * @var EntityInstanceManager
      */
     public $entityInstanceManager;
@@ -67,6 +74,10 @@ class PhoreDba
             if ($colValue === null) {
                 $values[] = "NULL";
                 continue;
+            }
+            if (is_object($colValue)) {
+                $ah = new EntityObjectAccessHelper($colValue);
+                $colValue = $ah->getPrimaryKey();
             }
             $values[] = $this->driver->escape((string)$colValue);
         }
@@ -104,6 +115,10 @@ class PhoreDba
             if ($colValue === null) {
                 $colValue = "NULL";
             } else {
+                if (is_object($colValue)) {
+                    $ah = new EntityObjectAccessHelper($colValue);
+                    $colValue = $ah->getPrimaryKey();
+                }
                 $colValue = $this->driver->escape((string)$colValue);
             }
             $values[] = $col->colName . "=" . $colValue;
@@ -214,7 +229,9 @@ class PhoreDba
             $input
         );
         $this->lastStatement = $stmt;
-        return new Result($this->driver->query($stmt));
+        $result = new Result($this->driver->query($stmt));
+        $this->lastResult = $result;
+        return $result;
     }
 
     /**

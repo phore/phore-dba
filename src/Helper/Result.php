@@ -14,33 +14,64 @@ use Phore\Dba\Ex\NoDataException;
 
 class Result
 {
+    /**
+     * @var DbDriverResult
+     */
     public $driverResult;
+
+    /**
+     * @var string|null
+     */
+    public $query;
 
     /**
      * Result constructor.
      * @param DbDriverResult $result
      */
-    public function __construct(DbDriverResult $result)
+    public function __construct(DbDriverResult $result, string $query = null)
     {
         $this->driverResult = $result;
+        $this->query = $query;
     }
 
 
+    /**
+     * Returns the count of affected rows
+     *
+     * !! This is not the number of results !!
+     * !! Use $db->query("SELECT COUNT(*) FROM Table")->first(0) to select the count !!
+     *
+     * @return int
+     */
     public function rowCount() : int
     {
         return $this->driverResult->rowCount();
     }
 
+
+
+
+
+
     /**
+     * Returns the row as array
+     *
+     * If parameter1 is set, returns the content of the column
+     *
      * @param $obj
-     * @return mixed
+     * @return array|string
      * @throws \Exception
      */
-    public function first() : array
+    public function first(string $columnName = null)
     {
         $data = $this->driverResult->fetch();
         if ($data === null)
             throw new NoDataException("first(): No data matched request.");
+        if ($columnName !== null) {
+            if ( ! isset ($data[$columnName]))
+                throw new \InvalidArgumentException("first(): Column '$columnName' not existing in result.");
+            return $data[$columnName];
+        }
         return $data;
     }
 
@@ -66,6 +97,26 @@ class Result
         }
         return $ret;
     }
+
+
+
+    public function dump(bool $return=false)
+    {
+        $data = $this->all();
+        // Print Header
+
+        if (count($data) === 0) {
+            echo "\ndump(): Empty result\n";
+        }
+        $header = array_keys($data[0]);
+
+        echo "\ndump({$this->query}): " . count($data) . "rows.\n";
+        foreach ($header as $col) {
+
+        }
+
+    }
+
 
     /**
      * @param $fn
