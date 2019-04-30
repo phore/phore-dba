@@ -11,7 +11,7 @@ It will map Objects to Tables using exact the same Names.
 
 ## Installation  
 
-Install otto-db using composer:
+Install  using composer:
 
 ```
 composer require phore/dba
@@ -37,11 +37,12 @@ class SomeEntity {
 }
 
 $odb = PhoreDba::InitDSN("sqlite:/path/to/sqlite.db3");
-$odb->query ("CREATE TABLE IF NOT EXISTS SomeEntity (
+// Use multi_query() to execute multiple Statements
+$odb->multi_query ("CREATE TABLE IF NOT EXISTS SomeEntity (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT,
     company TEXT
-)");
+);");
 
 $odb->insert(new SomeEntity(["name"=>"someName", "company"=>"SomeCompany"]));
 
@@ -91,9 +92,5 @@ assert ($enetity->isChanged("name") === true)
 
 ## Database Migrations
 
-Database Migrations are maintained by OttoDb binary:
 
-```
-
-```
 

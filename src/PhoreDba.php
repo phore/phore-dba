@@ -43,6 +43,13 @@ class PhoreDba
         $this->entityInstanceManager = new EntityInstanceManager();
     }
 
+
+    public function getDriver() : DbDriver
+    {
+        return $this->driver;
+    }
+
+
     /**
      * @param $obj
      * @return DbDriverResult
@@ -174,6 +181,11 @@ class PhoreDba
     }
 
     /**
+     * Execute a query
+     *
+     * **This will execute only the first statement in input due to security reasons**
+     * **Use PhoreDba::exec() to run multiple queries (e.g. for CREATE TABLES)      **
+     *
      * @param string $input
      * @param array  $args
      *
@@ -204,6 +216,19 @@ class PhoreDba
         $this->lastStatement = $stmt;
         return new Result($this->driver->query($stmt));
     }
+
+    /**
+     * Execute raw Query (May contain multiple queries separated by ;)
+     *
+     * **Don't use this method for user-generated input**
+     *
+     * @param string $input
+     */
+    public function multi_query(string $input) : void
+    {
+        $this->driver->multi_query($input);
+    }
+
 
     private static $instance = null;
 

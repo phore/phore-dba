@@ -46,4 +46,14 @@ class PdoDbDriver implements DbDriver
     {
         return $this->connection->lastInsertId();
     }
+
+    /**
+     * Execute raw query. May contain multiple Statements.
+     *
+     * @param string $stmt
+     */
+    public function multi_query(string $stmt): void
+    {
+        $this->connection->exec($stmt);
+    }
 }

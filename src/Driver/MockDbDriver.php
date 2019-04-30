@@ -30,4 +30,14 @@ class MockDbDriver implements DbDriver
     {
         return $this->lastInsertIdIndex++;
     }
+
+    /**
+     * Execute raw query. May contain multiple Statements.
+     *
+     * @param string $stmt
+     */
+    public function multi_query(string $stmt): void
+    {
+        // TODO: Implement exec() method.
+    }
 }
