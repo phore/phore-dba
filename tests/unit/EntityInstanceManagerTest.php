@@ -14,6 +14,11 @@ namespace Test;
 use Phore\Dba\Helper\EntityInstanceManager;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * Class EntityInstanceManagerTest
+ * @package Test
+ * @internal
+ */
 class EntityInstanceManagerTest extends TestCase
 {
 

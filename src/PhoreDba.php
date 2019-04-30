@@ -148,7 +148,6 @@ class PhoreDba
         $stmt = "DELETE FROM " . $meta->getTableName() . " WHERE " . $primKey . "=" . $this->driver->escape($obj->$primKey);
         $this->lastStatement = $stmt;
         $this->driver->query($stmt);
-        unset($obj);
         return $this;
     }
 
@@ -199,6 +198,23 @@ class PhoreDba
 
         return $obj;
     }
+
+
+    /**
+     * Select
+     *
+     * <example>
+     * $db->select(Car::class, ["name"=>"some name", "*sort"=>"name", "*limit"=>50]);
+     * </example>
+     *
+     * @param array $restriction
+     * @return array
+     */
+    public function select(string $className, array $restriction) : array
+    {
+
+    }
+
 
     /**
      * Execute a query
