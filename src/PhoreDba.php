@@ -314,4 +314,11 @@ class PhoreDba
         }
         return self::$instance;
     }
+
+
+    public static function Destroy()
+    {
+        self::$instance = null;
+    }
+
 }
