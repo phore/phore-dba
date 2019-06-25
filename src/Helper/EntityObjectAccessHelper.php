@@ -21,6 +21,12 @@ class EntityObjectAccessHelper
      */
     private $refl;
 
+
+    const PKTYPE_AUTOINC = "autoinc";
+    const PKTYPE_MANUAL = "manual";
+    const PKTYPE_UUID = "uuid";
+
+
     /**
      * MetaWrapper constructor.
      * @param mixed $obj
@@ -56,6 +62,18 @@ class EntityObjectAccessHelper
             return $this->meta['primaryKey'];
         }
         return "id";
+    }
+
+
+
+
+    public function getPrimaryKeyType() : string
+    {
+        if ( ! isset($this->meta["pkType"]))
+            return self::PKTYPE_AUTOINC;
+        if ( ! in_array($this->meta["pkType"], [self::PKTYPE_AUTOINC, self::PKTYPE_MANUAL, self::PKTYPE_UUID]))
+            throw new \InvalidArgumentException("Invalid pkType value '{$this->meta["pkType"]} in {$this->getClassName()}::__META__");
+        return $this->meta["pkType"];
     }
 
 

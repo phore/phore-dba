@@ -34,6 +34,8 @@ class EntityInstanceManager
         if ($pkVal == null)
             throw new \InvalidArgumentException("primary key value must not be null.");
         $key = $className . "#" . $pkVal;
+        if ( ! isset ($this->refcount[$key]))
+            return;
         $this->refcount[$key]--;
         if ($this->refcount[$key] === 0) {
             unset ($this->entities[$key]);
@@ -46,8 +48,20 @@ class EntityInstanceManager
         return count($this->entities);
     }
 
+
+    public function has(string $className, $pkVal)
+    {
+        if ($pkVal == null)
+            throw new \InvalidArgumentException("primary key value must not be null.");
+        $key = $className . "#" . $pkVal;
+        if ( ! isset ($this->entities[$key]))
+            return false;
+        return true;
+    }
+
     public function get (string $className, $pkVal)
     {
+
         if ($pkVal == null)
             throw new \InvalidArgumentException("primary key value must not be null.");
         $key = $className . "#" . $pkVal;

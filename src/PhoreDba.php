@@ -82,12 +82,16 @@ class PhoreDba
             $values[] = $this->driver->escape((string)$colValue);
         }
 
+        $primKey = $meta->getPrimaryKey();
+        if ($meta->getPrimaryKeyType() === EntityObjectAccessHelper::PKTYPE_UUID)
+            $obj->$primKey = uniqid();
+
         $stmt = "INSERT INTO " . $meta->getTableName() . " (" . implode(", ", $keys) . ") VALUES (" . implode(", ", $values) . ");";
         $this->lastStatement = $stmt;
         $this->driver->query($stmt);
 
-        $primKey = $meta->getPrimaryKey();
-        $obj->$primKey = $this->driver->getLastInsertId();
+        if ($meta->getPrimaryKeyType() === EntityObjectAccessHelper::PKTYPE_AUTOINC)
+            $obj->$primKey = $this->driver->getLastInsertId();
 
         $this->entityInstanceManager->push(get_class($obj), $obj->$primKey, $meta->getDataAssoc());
         return $this;
@@ -128,7 +132,7 @@ class PhoreDba
             $this->lastStatement = null;
             return $this;
         }
-        $stmt = "UPDATE " . $meta->getTableName() . " SET " . implode(", ", $values) . " WHERE " . $primKey . "=" . $this->driver->escape($obj->$primKey) . ";";
+        $stmt = "UPDATE " . $meta->getTableName() . " SET " . implode(", ", $values) . " WHERE " . $primKey . "=" . $this->driver->escape($meta->getPrimaryKeyValue()) . ";";
         $this->lastStatement = $stmt;
         $this->driver->query($stmt);
         $this->entityInstanceManager->push($meta->getClassName(), $meta->getPrimaryKeyValue(), $meta->getDataAssoc());
@@ -145,7 +149,7 @@ class PhoreDba
 
         $meta = new EntityObjectAccessHelper($obj);
         $primKey = $meta->getPrimaryKey();
-        $stmt = "DELETE FROM " . $meta->getTableName() . " WHERE " . $primKey . "=" . $this->driver->escape($obj->$primKey);
+        $stmt = "DELETE FROM " . $meta->getTableName() . " WHERE " . $primKey . "=" . $this->driver->escape($meta->getPrimaryKeyValue());
         $this->lastStatement = $stmt;
         $this->driver->query($stmt);
         return $this;

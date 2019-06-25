@@ -21,7 +21,19 @@ trait Entity
      */
     public function __construct(array $data = [])
     {
+
+        $eoa = new EntityObjectAccessHelper($this);
+        if (empty($data))
+            return;
+
+        if ($eoa->getPrimaryKeyType() === EntityObjectAccessHelper::PKTYPE_MANUAL) {
+            $eoa->setData($eoa->getPrimaryKey(), $data[$eoa->getPrimaryKey()]);
+        } else {
+            if (isset ($data[$eoa->getPrimaryKey()]))
+                throw new \InvalidArgumentException("You cannot construct a entity with preset PrimaryKey ('{$eoa->getPrimaryKey()}') with selected pkType == '{$eoa->getPrimaryKeyType()}'");
+        }
         $this->push($data);
+
     }
 
     /**
@@ -54,7 +66,11 @@ trait Entity
     public function isPersistent() : bool
     {
         $eoa = new EntityObjectAccessHelper($this);
-        return $eoa->getPrimaryKeyValue() !== null;
+        if ($eoa->getPrimaryKeyType() === EntityObjectAccessHelper::PKTYPE_MANUAL)
+            return PhoreDba::Get()->entityInstanceManager->has(get_parent_class($this), $eoa->getPrimaryKeyValue());
+        if ($eoa->getPrimaryKeyValue() === null)
+            return false;
+        return true;
     }
 
     /**
