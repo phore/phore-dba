@@ -62,6 +62,28 @@ trait Entity
         }
     }
 
+    /**
+     * Load a entities from database
+     *
+     * SomeEntity::Load(["prop1"=>"val1", "prop2"=>"val2"])
+     *
+     * @param $restrictions
+     * @return array
+     * @throws NoDataException
+     * @throws \Phore\Core\Exception\InvalidDataException
+     */
+    public static function Select($restrictions) : array
+    {
+        try {
+            return PhoreDba::Get()->select(
+                get_called_class(),
+                $restrictions
+            );
+        } catch (NoDataException $e) {
+            throw new NoDataException(get_called_class() . "::Select(): No matching data found in database.", 0);
+        }
+    }
+
 
     public function isPersistent() : bool
     {

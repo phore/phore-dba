@@ -9,6 +9,7 @@
 namespace Phore\Dba;
 
 
+use Phore\Core\Exception\InvalidDataException;
 use Phore\Dba\Driver\DbDriver;
 use Phore\Dba\Driver\DbDriverResult;
 use Phore\Dba\Driver\PdoDbDriver;
@@ -51,7 +52,7 @@ class PhoreDba
     }
 
 
-    public function getDriver() : DbDriver
+    public function getDriver(): DbDriver
     {
         return $this->driver;
     }
@@ -62,7 +63,7 @@ class PhoreDba
      * @return DbDriverResult
      * @throws \Exception
      */
-    public function insert($obj) : self
+    public function insert($obj): self
     {
         $meta = new EntityObjectAccessHelper($obj);
         $keys = [];
@@ -83,15 +84,18 @@ class PhoreDba
         }
 
         $primKey = $meta->getPrimaryKey();
-        if ($meta->getPrimaryKeyType() === EntityObjectAccessHelper::PKTYPE_UUID)
+        if ($meta->getPrimaryKeyType() === EntityObjectAccessHelper::PKTYPE_UUID) {
             $obj->$primKey = uniqid();
+        }
 
-        $stmt = "INSERT INTO " . $meta->getTableName() . " (" . implode(", ", $keys) . ") VALUES (" . implode(", ", $values) . ");";
+        $stmt = "INSERT INTO " . $meta->getTableName() . " (" . implode(", ", $keys) . ") VALUES (" . implode(", ",
+                $values) . ");";
         $this->lastStatement = $stmt;
         $this->driver->query($stmt);
 
-        if ($meta->getPrimaryKeyType() === EntityObjectAccessHelper::PKTYPE_AUTOINC)
+        if ($meta->getPrimaryKeyType() === EntityObjectAccessHelper::PKTYPE_AUTOINC) {
             $obj->$primKey = $this->driver->getLastInsertId();
+        }
 
         $this->entityInstanceManager->push(get_class($obj), $obj->$primKey, $meta->getDataAssoc());
         return $this;
@@ -102,17 +106,19 @@ class PhoreDba
      * @return DbDriverResult
      * @throws \Exception
      */
-    public function update($obj, $forceUpdate=false) : self
+    public function update($obj, $forceUpdate = false): self
     {
         $meta = new EntityObjectAccessHelper($obj);
         $values = [];
         $primKey = $meta->getPrimaryKey();
 
         foreach ($meta->getProperties() as $col) {
-            if ($col->colName === $primKey)
+            if ($col->colName === $primKey) {
                 continue;
-            if ( ! $obj->isChanged($col->name) && ! $forceUpdate)
+            }
+            if (!$obj->isChanged($col->name) && !$forceUpdate) {
                 continue;
+            }
 
             $colValue = $col->value;
 
@@ -132,7 +138,8 @@ class PhoreDba
             $this->lastStatement = null;
             return $this;
         }
-        $stmt = "UPDATE " . $meta->getTableName() . " SET " . implode(", ", $values) . " WHERE " . $primKey . "=" . $this->driver->escape($meta->getPrimaryKeyValue()) . ";";
+        $stmt = "UPDATE " . $meta->getTableName() . " SET " . implode(", ",
+                $values) . " WHERE " . $primKey . "=" . $this->driver->escape($meta->getPrimaryKeyValue()) . ";";
         $this->lastStatement = $stmt;
         $this->driver->query($stmt);
         $this->entityInstanceManager->push($meta->getClassName(), $meta->getPrimaryKeyValue(), $meta->getDataAssoc());
@@ -144,7 +151,7 @@ class PhoreDba
      * @return self
      * @throws \Exception
      */
-    public function delete($obj) : self
+    public function delete($obj): self
     {
 
         $meta = new EntityObjectAccessHelper($obj);
@@ -179,11 +186,11 @@ class PhoreDba
             foreach ($restrictionsOrPkValue as $property => $restrictionValue) {
 
                 $colValue = $this->driver->escape((string)$restrictionValue);
-                $values[] = $property."=".$colValue;
+                $values[] = $property . "=" . $colValue;
             }
             $where = implode(" AND ", $values);
         } else {
-            $where = $meta->getPrimaryKey()."=".$this->driver->escape($restrictionsOrPkValue);
+            $where = $meta->getPrimaryKey() . "=" . $this->driver->escape($restrictionsOrPkValue);
         }
 
 
@@ -214,9 +221,41 @@ class PhoreDba
      * @param array $restriction
      * @return array
      */
-    public function select(string $className, array $restriction) : array
+    public function select(string $className, array $restriction): array
     {
 
+        $meta = new EntityObjectAccessHelper($obj = new $className());
+        $values = [];
+
+        if (is_array($restriction) && $this->is_assocArray($restriction)) {
+            foreach ($restriction as $property => $restrictionValue) {
+
+                $colValue = $this->driver->escape((string)$restrictionValue);
+                $values[] = $property . "=" . $colValue;
+            }
+            $where = implode(" AND ", $values);
+        } else {
+            throw new InvalidDataException("\$restriction needs to be an associative array");
+        }
+
+
+        $stmt = "SELECT * FROM " . $meta->getTableName() . " WHERE {$where};";
+        $this->lastStatement = $stmt;
+
+        $ret = $this->query($stmt);
+
+        $data = $ret->all();
+
+        if (empty($data)) {
+            throw new NoDataException("Cannot load() entity $className: $stmt");
+        }
+
+        foreach ($data as $dataset) {
+            $this->entityInstanceManager->push($className, $dataset[$meta->getPrimaryKey()], $dataset);
+            $meta->setDataAssoc($dataset);
+            $result[] = $obj;
+        }
+        return $result;
     }
 
 
@@ -227,11 +266,11 @@ class PhoreDba
      * **Use PhoreDba::exec() to run multiple queries (e.g. for CREATE TABLES)      **
      *
      * @param string $input
-     * @param array  $args
+     * @param array $args
      *
      * @return Result
      */
-    public function query(string $input, array $args = []) : Result
+    public function query(string $input, array $args = []): Result
     {
         $argsCounter = 0;
 
@@ -239,14 +278,14 @@ class PhoreDba
             '/\?|\:[a-z0-9_\-\.]+/i',
             function ($match) use (&$argsCounter, &$args) {
                 if ($match[0] === '?') {
-                    if(empty($args)){
+                    if (empty($args)) {
                         throw new \Exception("Index $argsCounter missing");
                     }
                     $argsCounter++;
                     return $this->driver->escape(array_shift($args));
                 }
                 $key = substr($match[0], 1);
-                if (!isset($args[$key])){
+                if (!isset($args[$key])) {
                     throw new \Exception("Key '$key' not found");
                 }
                 return $this->driver->escape($args[$key]);
@@ -266,7 +305,7 @@ class PhoreDba
      *
      * @param string $input
      */
-    public function multi_query(string $input) : void
+    public function multi_query(string $input): void
     {
         $this->driver->multi_query($input);
     }
@@ -287,7 +326,7 @@ class PhoreDba
      *
      * @return PhoreDba
      */
-    public static function InitDSN (string $conStr) : PhoreDba
+    public static function InitDSN(string $conStr): PhoreDba
     {
         $parts = parse_url($conStr);
         //print_r($parts);
@@ -305,8 +344,9 @@ class PhoreDba
 
     public static function Init(DbDriver $driver): PhoreDba
     {
-        if (self::$instance !== null)
+        if (self::$instance !== null) {
             throw new \InvalidArgumentException("PhoreDba is already initialized.");
+        }
         self::$instance = new self($driver);
         return self::$instance;
     }
@@ -323,6 +363,15 @@ class PhoreDba
     public static function Destroy()
     {
         self::$instance = null;
+    }
+
+    private function is_assocArray(array $arr)
+    {
+        if (array_keys($arr) !== range(0, count($arr) - 1)) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
 }
