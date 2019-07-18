@@ -221,25 +221,29 @@ class PhoreDba
      * @param array $restriction
      * @return array
      */
-    public function select(string $className, array $restriction): array
+    public function select(string $className, array $restriction = null): array
     {
 
         $meta = new EntityObjectAccessHelper($obj = new $className());
         $values = [];
 
-        if (is_array($restriction) && $this->is_assocArray($restriction)) {
-            foreach ($restriction as $property => $restrictionValue) {
+        if ($restriction !== null) {
 
-                $colValue = $this->driver->escape((string)$restrictionValue);
-                $values[] = $property . "=" . $colValue;
+            if (is_array($restriction) && $this->is_assocArray($restriction)) {
+                foreach ($restriction as $property => $restrictionValue) {
+
+                    $colValue = $this->driver->escape((string)$restrictionValue);
+                    $values[] = $property . "=" . $colValue;
+                }
+                $where = implode(" AND ", $values);
+            } else {
+                throw new InvalidDataException("\$restriction needs to be an associative array");
             }
-            $where = implode(" AND ", $values);
+            $stmt = "SELECT * FROM " . $meta->getTableName() . " WHERE {$where};";
         } else {
-            throw new InvalidDataException("\$restriction needs to be an associative array");
+            $stmt = "SELECT * FROM " . $meta->getTableName() . ";";
         }
 
-
-        $stmt = "SELECT * FROM " . $meta->getTableName() . " WHERE {$where};";
         $this->lastStatement = $stmt;
 
         $ret = $this->query($stmt);
@@ -257,7 +261,6 @@ class PhoreDba
         }
         return $result;
     }
-
 
     /**
      * Execute a query
