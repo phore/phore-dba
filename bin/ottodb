@@ -10,6 +10,7 @@
 namespace OttoDB;
 
 
+use Exception;
 use OttoDB\Migration\MigrationKernel;
 use Phore\Cli\CliController;
 
@@ -18,7 +19,7 @@ require __DIR__ . "/../vendor/autoload.php";
 
 $localAutoLoad = getcwd() . "/vendor/autoload.php";
 if ( ! file_exists($localAutoLoad))
-    throw new \Exception("Cannot load $localAutoLoad.");
+    throw new Exception("Cannot load $localAutoLoad.");
 
 require $localAutoLoad;
 
