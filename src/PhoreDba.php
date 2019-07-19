@@ -257,7 +257,7 @@ class PhoreDba
         foreach ($data as $dataset) {
             $this->entityInstanceManager->push($className, $dataset[$meta->getPrimaryKey()], $dataset);
             $meta->setDataAssoc($dataset);
-            $result[] = $obj;
+            $result[] = clone $obj;
         }
         return $result;
     }
