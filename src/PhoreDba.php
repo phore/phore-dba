@@ -141,7 +141,11 @@ class PhoreDba
         $stmt = "UPDATE " . $meta->getTableName() . " SET " . implode(", ",
                 $values) . " WHERE " . $primKey . "=" . $this->driver->escape($meta->getPrimaryKeyValue()) . ";";
         $this->lastStatement = $stmt;
-        $this->driver->query($stmt);
+        $affectedRows =  $this->driver->query($stmt)->rowCount();
+
+        if ($affectedRows === 0){
+            throw new \Exception("No rows were affected by update command.");
+        }
         $this->entityInstanceManager->push($meta->getClassName(), $meta->getPrimaryKeyValue(), $meta->getDataAssoc());
         return $this;
     }
@@ -158,7 +162,11 @@ class PhoreDba
         $primKey = $meta->getPrimaryKey();
         $stmt = "DELETE FROM " . $meta->getTableName() . " WHERE " . $primKey . "=" . $this->driver->escape($meta->getPrimaryKeyValue());
         $this->lastStatement = $stmt;
-        $this->driver->query($stmt);
+        $affectedRows =  $this->driver->query($stmt)->rowCount();
+
+        if ($affectedRows === 0){
+            throw new \Exception("No rows were affected by delete command.");
+        }
         return $this;
     }
 
