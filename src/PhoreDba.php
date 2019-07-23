@@ -160,7 +160,7 @@ class PhoreDba
 
         $meta = new EntityObjectAccessHelper($obj);
         $primKey = $meta->getPrimaryKey();
-        $stmt = "DELETE FROM " . $meta->getTableName() . " WHERE " . $primKey . "=" . $this->driver->escape($meta->getPrimaryKeyValue());
+        $stmt = "DELETE FROM " . $meta->getTableName() . " WHERE " . $primKey . "=" . $this->driver->escape((string)$meta->getPrimaryKeyValue());
         $this->lastStatement = $stmt;
         $affectedRows =  $this->driver->query($stmt)->rowCount();
 
