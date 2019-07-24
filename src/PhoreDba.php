@@ -332,7 +332,7 @@ class PhoreDba
      * mysqli:
      *
      * mysqli:user:pass@server1,server2/dbname
-     *
+     * @throws \InvalidArgumentException
      * @param string $conStr
      *
      * @return PhoreDba
